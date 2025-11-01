@@ -10,4 +10,8 @@
 		"jsx": "react-jsx",
 		"jsxImportSource": "hono/jsx"
 	}
+,
+	"references": [
+        { "path": "../../packages/db" }
+    ]
 }

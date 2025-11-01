@@ -1,6 +1,7 @@
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
-import fs from "fs";
+import { getBlob } from "./getBlob";
+
 
 export async function generateAIResponse(prompt: string) {
     const response = await generateText({
@@ -10,15 +11,14 @@ export async function generateAIResponse(prompt: string) {
     return response.text;
 }
 
-export async function generateMistralResponse(prompt: string, filePath: string) {
+export async function generateMistralResponse(prompt: string, file: Uint8Array) {
 
-const buf = await fs.promises.readFile(filePath);
-
-  const result = await generateText({
-  model: google("gemini-2.5-flash"),
-  messages: [
-    {
-      role: 'user',
+const buf = file;
+    const result = await generateText({
+        model: google("gemini-2.5-flash"),
+        messages: [
+            {
+                role: 'user',
       content: [
         {
           type: 'text',
@@ -44,4 +44,5 @@ const buf = await fs.promises.readFile(filePath);
 
 }
 
-await generateMistralResponse("Summarize the content of the document.", "apps/server/src/assets/udbhav.pdf")
+const file = await getBlob(1);
+await generateMistralResponse("Summarize the content of the document.", file!)

@@ -30,7 +30,8 @@
     "@ai-sdk/google": "^2.0.26",
     "ai": "^5.0.86",
     "dotenv": "^17.2.2",
-    "zod": "^4.1.11"
+    "zod": "^4.1.11",
+    "drizzle-orm": "^0.44.2"
   },
   "devDependencies": {
     "turbo": "^2.5.4",
