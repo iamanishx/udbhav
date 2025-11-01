@@ -106,15 +106,15 @@ if ! command -v pm2 &> /dev/null; then
     bun add -g pm2
 fi
 
-# Create PM2 ecosystem file for dev mode
-cat > ecosystem.config.js << 'EOF'
+# Create PM2 ecosystem file for dev mode (CommonJS format)
+cat > ecosystem.config.cjs << EOF
 module.exports = {
   apps: [
     {
       name: 'udbhav-backend',
       script: 'bun',
       args: 'run dev:server',
-      cwd: '/home/manish/projects/udbhav/udbhav',
+      cwd: '$SCRIPT_DIR',
       instances: 1,
       exec_mode: 'fork',
       env: {
@@ -135,7 +135,7 @@ module.exports = {
       name: 'udbhav-frontend',
       script: 'bun',
       args: 'run dev:web',
-      cwd: '/home/manish/projects/udbhav/udbhav',
+      cwd: '$SCRIPT_DIR',
       instances: 1,
       exec_mode: 'fork',
       env: {
@@ -170,7 +170,7 @@ print_success "Old processes stopped"
 
 # Step 9: Start services with PM2
 print_step "Starting backend and frontend servers..."
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 pm2 save
 print_success "Services started with PM2"
 
