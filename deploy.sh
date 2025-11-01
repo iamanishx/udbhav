@@ -48,7 +48,11 @@ fi
 print_success "Bun is installed"
 
 if ! command -v caddy &> /dev/null; then
-    print_error "Caddy is not installed. Please run: sudo apt install -y caddy"
+    print_error "Caddy is not installed."
+    echo ""
+    echo "To install Caddy on Amazon Linux, run:"
+    echo "  bash install-caddy-amazonlinux.sh"
+    echo ""
     exit 1
 fi
 print_success "Caddy is installed"
