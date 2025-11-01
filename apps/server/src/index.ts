@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import auth from "./routes/auth";
+import health from "./routes/patient-records";
 
 const app = new Hono();
 
@@ -21,8 +22,7 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
-// Mount auth routes at both /api/auth and /auth for callback compatibility
 app.route("/api/auth", auth);
-app.route("/auth", auth);
+app.route("/api/health", health);
 
 export default app;
