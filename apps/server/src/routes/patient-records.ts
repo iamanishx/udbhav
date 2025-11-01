@@ -2,11 +2,12 @@ import { Hono } from 'hono'
 import { createPatientDto, fileDto } from '../dtos/main.dtos'
 import { db, patients } from '@udbhav/db'
 import { v7 as uuidv7 } from 'uuid'
+import {jwtMiddleware} from './auth'
 
 const health = new Hono();
 
-health.post('/create/patient', async (c) => {
-    
+health.post('/create/patient', jwtMiddleware, async (c) => {
+
     const { username, email } = await c.req.json();
     const parsed = createPatientDto.safeParse({ username, email });
 
@@ -26,7 +27,7 @@ health.post('/create/patient', async (c) => {
     return c.json({ success: true });
 });
 
-health.post('/upload-records', async (c) => {
+health.post('/upload-records', jwtMiddleware, async (c) => {
     const result = await c.req.json();
     const parsed = fileDto.safeParse(result);
 
@@ -34,3 +35,5 @@ health.post('/upload-records', async (c) => {
         return c.json({ error: parsed.error }, 400);
     }
 });
+
+export default health;

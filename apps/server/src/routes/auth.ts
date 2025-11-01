@@ -199,4 +199,20 @@ auth.post('/logout', async (c) => {
   }
 })
 
+export const jwtMiddleware = async (c: any, next: any) => {
+  const sessionToken = getCookie(c, 'session')
+  
+  if (!sessionToken) {
+    return c.json({ error: 'Not authenticated' }, 401)
+  }
+
+  const payload = await verify(sessionToken, JWT_SECRET)
+  
+  if (!payload || typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) {
+    deleteCookie(c, 'session')
+    return c.json({ error: 'Session expired' }, 401)
+  }
+  await next()
+}
+
 export default auth
