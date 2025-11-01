@@ -9,6 +9,9 @@ const sessions = new Map<string, { email: string; name: string; picture: string;
 
 // JWT secret - should be in env variable
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-this'
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || ''
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || ''
+const FRONTEND_URL = process.env.CORS_ORIGIN || 'http://localhost:5173'
 
 interface GoogleTokenPayload {
   email: string
@@ -145,6 +148,103 @@ auth.get('/me', async (c) => {
   } catch (error) {
     console.error('Session verification error:', error)
     return c.json({ error: 'Invalid session' }, 401)
+  }
+})
+
+// GET /api/auth/google - Initiate Google OAuth flow
+auth.get('/google', async (c) => {
+  const redirectUri = `${c.req.url.split('/api')[0]}/auth/google/callback`
+  
+  const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
+  googleAuthUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID)
+  googleAuthUrl.searchParams.set('redirect_uri', redirectUri)
+  googleAuthUrl.searchParams.set('response_type', 'code')
+  googleAuthUrl.searchParams.set('scope', 'openid email profile')
+  googleAuthUrl.searchParams.set('access_type', 'offline')
+  googleAuthUrl.searchParams.set('prompt', 'consent')
+
+  return c.redirect(googleAuthUrl.toString())
+})
+
+// GET /auth/google/callback - Handle OAuth callback
+auth.get('/google/callback', async (c) => {
+  try {
+    const code = c.req.query('code')
+    const error = c.req.query('error')
+
+    if (error) {
+      console.error('OAuth error:', error)
+      return c.redirect(`${FRONTEND_URL}/login?error=${encodeURIComponent(error)}`)
+    }
+
+    if (!code) {
+      return c.redirect(`${FRONTEND_URL}/login?error=no_code`)
+    }
+
+    // Exchange authorization code for tokens
+    const redirectUri = `${c.req.url.split('/auth')[0]}/auth/google/callback`
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      }),
+    })
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.text()
+      console.error('Token exchange failed:', errorData)
+      return c.redirect(`${FRONTEND_URL}/login?error=token_exchange_failed`)
+    }
+
+    const tokens = await tokenResponse.json() as { id_token: string; access_token: string }
+
+    // Verify and decode the ID token
+    const payload = await verifyGoogleToken(tokens.id_token)
+
+    if (!payload) {
+      return c.redirect(`${FRONTEND_URL}/login?error=invalid_token`)
+    }
+
+    // Create session token
+    const sessionToken = await sign(
+      {
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days
+      },
+      JWT_SECRET
+    )
+
+    // Store session
+    sessions.set(sessionToken, {
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+    })
+
+    // Set HTTP-only cookie
+    setCookie(c, 'session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    })
+
+    // Redirect back to frontend
+    return c.redirect(`${FRONTEND_URL}/?login=success`)
+  } catch (error) {
+    console.error('OAuth callback error:', error)
+    return c.redirect(`${FRONTEND_URL}/login?error=callback_failed`)
   }
 })
 

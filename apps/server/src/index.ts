@@ -21,7 +21,8 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
-// Mount auth routes
+// Mount auth routes at both /api/auth and /auth for callback compatibility
 app.route("/api/auth", auth);
+app.route("/auth", auth);
 
 export default app;

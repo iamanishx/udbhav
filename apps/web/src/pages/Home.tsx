@@ -34,6 +34,13 @@ export default function Home() {
       }
     }
 
+    // Check for login success parameter
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('login') === 'success') {
+      // Clean up URL
+      window.history.replaceState({}, '', '/')
+    }
+
     checkAuth()
   }, [])
 
