@@ -31,6 +31,7 @@
     "ai": "^5.0.86",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.2",
+    "react-router-dom": "^7.9.5",
     "sqlite-vec": "^0.1.7-alpha.2",
     "zod": "^4.1.11"
   },

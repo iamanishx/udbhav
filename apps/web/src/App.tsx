@@ -1,6 +1,9 @@
 import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
 
-function App() {
+function Landing() {
   return (
     <div className="landing-page">
       {/* Navigation */}
@@ -13,7 +16,7 @@ function App() {
             </div>
             <div className="nav-buttons">
               <button className="btn-demo">Try Demo</button>
-              <button className="btn-login">Login</button>
+              <a href="/login" className="btn-login">Login</a>
             </div>
           </div>
         </div>
@@ -378,4 +381,14 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Landing />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
