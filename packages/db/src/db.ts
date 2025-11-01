@@ -7,7 +7,6 @@ import * as sqliteVec from 'sqlite-vec';
 const dbPath = path.resolve(__dirname, '../memory.db');
 const sqlite = new Database(dbPath);
 
-// Load sqlite-vec extension
 sqliteVec.load(sqlite);
 
 export const db = drizzle({
