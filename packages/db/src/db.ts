@@ -1,8 +1,10 @@
 import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { Database } from 'bun:sqlite';
 import * as schema from './schema';
+import path from 'path';
 
-const sqlite = new Database('memory.db');
+const dbPath = path.resolve(__dirname, '../memory.db');
+const sqlite = new Database(dbPath);
 export const db = drizzle({
   client: sqlite,
   schema

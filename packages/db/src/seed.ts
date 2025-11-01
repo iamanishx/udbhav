@@ -7,19 +7,27 @@ async function seed() {
   console.log('🌱 Starting database seed...');
 
   try {
+    console.log('Clearing existing data...');
+    await db.delete(medicalRecords);
+    await db.delete(users);
+    console.log('Existing data cleared');
+
     console.log('Inserting users...');
     const insertedUsers = await db.insert(users).values([
       {
+        id: 1,
         username: 'john_doe',
         email: 'john@example.com',
         summary: 'Software engineer with history of regular health checkups.',
       },
       {
+        id: 2,
         username: 'jane_smith',
         email: 'jane@example.com',
         summary: 'Marketing professional, follows vegetarian diet.',
       },
       {
+        id: 3,
         username: 'bob_wilson',
         email: 'bob@example.com',
         summary: 'Retired teacher, manages chronic condition with medication.',
@@ -47,6 +55,7 @@ async function seed() {
     
     const recordsToInsert = [
       {
+        id: 1,
         userId: insertedUsers[0]!.id,
         recordDate: Math.floor(new Date('2024-01-15').getTime() / 1000),
         description: 'Annual physical examination - All vitals normal',
@@ -55,6 +64,7 @@ async function seed() {
         summary: 'Routine checkup showing good overall health. Blood pressure: 120/80, Heart rate: 72 bpm.',
       },
       {
+        id: 2,
         userId: insertedUsers[0]!.id,
         recordDate: Math.floor(new Date('2024-06-20').getTime() / 1000),
         description: 'Blood test results',
@@ -63,6 +73,7 @@ async function seed() {
         summary: 'Complete blood count within normal ranges. Cholesterol levels slightly elevated.',
       },
       {
+        id: 3,
         userId: insertedUsers[1]!.id,
         recordDate: Math.floor(new Date('2024-03-10').getTime() / 1000),
         description: 'Dental checkup and cleaning',
@@ -71,6 +82,7 @@ async function seed() {
         summary: 'No cavities detected. Gums healthy. Recommended flossing more regularly.',
       },
       {
+        id: 4,
         userId: insertedUsers[1]!.id,
         recordDate: Math.floor(new Date('2024-08-05').getTime() / 1000),
         description: 'Eye examination',
@@ -79,6 +91,7 @@ async function seed() {
         summary: 'Vision test shows slight myopia progression. Updated prescription provided.',
       },
       {
+        id: 5,
         userId: insertedUsers[2]!.id,
         recordDate: Math.floor(new Date('2024-02-28').getTime() / 1000),
         description: 'Cardiology consultation',
@@ -87,6 +100,7 @@ async function seed() {
         summary: 'EKG normal. Blood pressure management improving with current medication regimen.',
       },
       {
+        id: 6,
         userId: insertedUsers[2]!.id,
         recordDate: Math.floor(new Date('2024-07-12').getTime() / 1000),
         description: 'Medication review and refill',

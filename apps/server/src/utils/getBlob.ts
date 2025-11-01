@@ -1,11 +1,11 @@
-import { db, schema } from '@udbhav/db';
+import { db, medicalRecords } from '@udbhav/db';
 import { eq } from 'drizzle-orm';
 
 export async function getBlob(id: number): Promise<Uint8Array | null> {
   const result = await db
     .select()
-    .from(schema.medicalRecords)
-.where(eq(schema.medicalRecords.id, id))
+    .from(medicalRecords)
+    .where(eq(medicalRecords.id, id))
     .limit(1)
     .execute();
 
