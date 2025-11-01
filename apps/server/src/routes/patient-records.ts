@@ -1,12 +1,12 @@
 import { Hono } from 'hono'
-import { createPatientDto, createMedicalRecordDto } from '../dtos/main.dtos'
+import { uploadMedicalRecordDto, createPatientDto } from '../dtos/main.dtos'
 import { db, patients, medicalRecords } from '@udbhav/db'
 import { v7 as uuidv7 } from 'uuid'
 import { jwtMiddleware } from './auth'
+import { generateMedicalSummary } from '../utils/ai'
 
 const health = new Hono();
 
-// Get all patients
 health.get('/patients', jwtMiddleware, async (c) => {
     try {
         const allPatients = await db.select().from(patients).execute();
@@ -17,18 +17,16 @@ health.get('/patients', jwtMiddleware, async (c) => {
     }
 });
 
-// Get records for a specific patient
 health.get('/patients/:id/records', jwtMiddleware, async (c) => {
     try {
         const patientId = c.req.param('id');
         const allRecords = await db.select().from(medicalRecords).execute();
-        // Filter and sort in memory to avoid drizzle-orm type issues
         const patientRecords = allRecords
             .filter((record: any) => (record.patientId === patientId || record.patient_id === patientId))
             .sort((a: any, b: any) => {
                 const dateA = a.recordDate || a.record_date || 0;
                 const dateB = b.recordDate || b.record_date || 0;
-                return dateB - dateA; // Descending order (newest first)
+                return dateB - dateA;
             });
         
         return c.json(patientRecords);
@@ -59,62 +57,120 @@ health.post('/create/patient', jwtMiddleware, async (c) => {
     return c.json({ success: true });
 });
 
-health.post('/create/record', jwtMiddleware, async (c) => {
-    try {
-        const body = await c.req.json();
-        const parsed = createMedicalRecordDto.safeParse(body);
-
-        if (!parsed.success) {
-            return c.json({ error: parsed.error }, 400);
-        }
-
-        const record = await db.insert(medicalRecords).values({
-            id: uuidv7(),
-            patientId: parsed.data.patientId,
-            recordDate: parsed.data.recordDate,
-            description: parsed.data.description,
-            summary: parsed.data.summary || null,
-            mimeType: parsed.data.mimeType || 'text/plain',
-            data: null, // No file data for manual text records
-        }).returning();
-
-        return c.json({ success: true, record: record[0] });
-    } catch (e) {
-        console.error('Failed to create record:', e);
-        return c.json({ error: 'Failed to create medical record' }, 500);
-    }
-});
-
 health.post('/upload-records', jwtMiddleware, async (c) => {
     try {
         const formData = await c.req.parseBody();
+        
         const file = formData.file as File;
+        if (!file) {
+            return c.json({ error: 'No file provided' }, 400);
+        }
+
+        const allowedTypes = [
+            'application/pdf',
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
+            'image/webp'
+        ];
+        
+        if (!allowedTypes.includes(file.type)) {
+            return c.json({ 
+                error: 'Invalid file type. Only PDF and image files are allowed.',
+                allowedTypes 
+            }, 400);
+        }
+
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+            return c.json({ 
+                error: 'File too large. Maximum size is 10MB.',
+                maxSize 
+            }, 400);
+        }
+
         const patientId = formData.patientId as string;
         const description = formData.description as string;
-        const summary = formData.summary as string | undefined;
-        const recordDate = parseInt(formData.recordDate as string);
+        const recordDateStr = formData.recordDate as string | undefined;
+        const generateSummaryStr = formData.generateSummary as string | undefined;
 
-        if (!file || !patientId || !description) {
-            return c.json({ error: 'Missing required fields: file, patientId, description' }, 400);
+        const dtoData = {
+            patientId,
+            description,
+            recordDate: recordDateStr ? parseInt(recordDateStr) : Math.floor(Date.now() / 1000),
+            generateSummary: generateSummaryStr !== 'false',
+        };
+
+        const parsed = uploadMedicalRecordDto.safeParse(dtoData);
+        if (!parsed.success) {
+            return c.json({ 
+                error: 'Validation failed',
+                details: parsed.error.issues 
+            }, 400);
+        }
+
+        const allPatients = await db.select().from(patients).execute();
+        const patient = allPatients.find((p: any) => p.id === parsed.data.patientId);
+
+        if (!patient) {
+            return c.json({ error: 'Patient not found' }, 404);
         }
 
         const fileBuffer = await file.arrayBuffer();
-        const fileData = new Uint8Array(fileBuffer);
+        const fileData = Buffer.from(fileBuffer);
 
-        const record = await db.insert(medicalRecords).values({
-            id: uuidv7(),
-            patientId: patientId,
-            recordDate: recordDate || Math.floor(Date.now() / 1000),
-            description: description,
-            summary: summary || null,
-            mimeType: file.type || 'application/octet-stream',
+        let summary: string | null = null;
+        if (parsed.data.generateSummary) {
+            try {
+                console.log(`Generating AI summary for medical record...`);
+                summary = await generateMedicalSummary(
+                    new Uint8Array(fileBuffer),
+                    file.type,
+                    parsed.data.description
+                );
+                console.log(`AI summary generated successfully`);
+            } catch (error) {
+                console.error('Failed to generate summary:', error);
+                summary = null;
+            }
+        }
+
+        const recordId = uuidv7();
+        const insertData = {
+            id: recordId,
+            patientId: parsed.data.patientId,
+            recordDate: parsed.data.recordDate!,
+            description: parsed.data.description,
+            summary: summary,
+            mimeType: file.type,
             data: fileData,
-        }).returning();
+        };
 
-        return c.json({ success: true, record: record[0] });
+        const record = await db.insert(medicalRecords).values(insertData).returning();
+
+        console.log(`Medical record created: ${recordId}`);
+
+        return c.json({ 
+            success: true, 
+            record: {
+                id: record[0]?.id,
+                patientId: record[0]?.patientId,
+                description: record[0]?.description,
+                summary: record[0]?.summary,
+                mimeType: record[0]?.mimeType,
+                recordDate: record[0]?.recordDate,
+                createdAt: record[0]?.createdAt,
+                fileSize: file.size,
+            },
+            message: summary ? 'Record uploaded and AI summary generated' : 'Record uploaded'
+        });
     } catch (e) {
         console.error('Failed to upload record:', e);
-        return c.json({ error: 'Failed to upload medical record' }, 500);
+        return c.json({ 
+            error: 'Failed to upload medical record',
+            details: e instanceof Error ? e.message : 'Unknown error'
+        }, 500);
     }
 });
 

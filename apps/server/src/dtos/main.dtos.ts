@@ -5,8 +5,11 @@ export const createPatientDto = z.object({
   email: email(),
 });
 
-export const fileDto = z.object({
-  file: z.instanceof(Uint8Array),
+export const uploadMedicalRecordDto = z.object({
+  patientId: z.string().min(1, "Patient ID is required"),
+  description: z.string().min(10, "Description must be at least 10 characters").max(1000),
+  recordDate: z.number().int().positive().optional(),
+  generateSummary: z.boolean().default(true),
 });
 
 export const createMedicalRecordDto = z.object({

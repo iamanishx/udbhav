@@ -469,6 +469,69 @@
   font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
 }
 
+/* Form styling */
+.form-readonly {
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: var(--color-lightest);
+  font-weight: 500;
+}
+
+.form-group input[type="file"] {
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(168, 213, 186, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-lightest);
+}
+
+.form-group input[type="file"]:hover:not(:disabled) {
+  border-color: var(--color-light);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-group input[type="file"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.file-info {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(107, 191, 138, 0.1);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--color-light);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-info {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(107, 191, 138, 0.1);
+  border: 1px solid rgba(107, 191, 138, 0.3);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--color-lightest);
+  margin-bottom: 1rem;
+}
+
+.form-info svg {
+  flex-shrink: 0;
+  margin-right: 8px;
+  color: var(--color-light);
+}
+
 /* Scrollbar styling */
 .sidebar-content::-webkit-scrollbar,
 .records-container::-webkit-scrollbar {

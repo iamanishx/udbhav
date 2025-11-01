@@ -18,133 +18,6 @@ interface MedicalRecord {
   createdAt: number
 }
 
-// Dummy data for testing
-const getDummyPatients = (): Patient[] => [
-  {
-    id: 'patient-1',
-    username: 'John Smith',
-    email: 'john.smith@example.com',
-    createdAt: Math.floor(Date.now() / 1000) - 86400 * 30
-  },
-  {
-    id: 'patient-2',
-    username: 'Sarah Johnson',
-    email: 'sarah.johnson@example.com',
-    createdAt: Math.floor(Date.now() / 1000) - 86400 * 45
-  },
-  {
-    id: 'patient-3',
-    username: 'Michael Chen',
-    email: 'michael.chen@example.com',
-    createdAt: Math.floor(Date.now() / 1000) - 86400 * 20
-  },
-  {
-    id: 'patient-4',
-    username: 'Emily Rodriguez',
-    email: 'emily.rodriguez@example.com',
-    createdAt: Math.floor(Date.now() / 1000) - 86400 * 60
-  },
-  {
-    id: 'patient-5',
-    username: 'David Williams',
-    email: 'david.williams@example.com',
-    createdAt: Math.floor(Date.now() / 1000) - 86400 * 15
-  }
-]
-
-const getDummyRecords = (): Record<string, MedicalRecord[]> => ({
-  'patient-1': [
-    {
-      id: 'record-1-1',
-      userId: 'patient-1',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 5,
-      description: 'Annual physical examination. Patient reports feeling well overall. Blood pressure 120/80, heart rate 72 bpm. No significant findings.',
-      summary: 'Normal annual physical examination. Vital signs within normal limits. No acute concerns.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 5
-    },
-    {
-      id: 'record-1-2',
-      userId: 'patient-1',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 90,
-      description: 'Follow-up visit for persistent cough. Patient reports 2-week history of dry cough. Lungs clear on auscultation. Prescribed cough suppressant.',
-      summary: 'Follow-up for persistent cough. Lungs clear. Symptomatic treatment initiated.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 90
-    },
-    {
-      id: 'record-1-3',
-      userId: 'patient-1',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 180,
-      description: 'Routine check-up. Lab results show normal cholesterol levels. Advised to continue current diet and exercise regimen.',
-      summary: 'Routine check-up with normal lab results. Continue preventive care measures.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 180
-    }
-  ],
-  'patient-2': [
-    {
-      id: 'record-2-1',
-      userId: 'patient-2',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 3,
-      description: 'Emergency visit for acute abdominal pain. CT scan reveals appendicitis. Patient scheduled for appendectomy.',
-      summary: 'Acute appendicitis diagnosed. Surgical intervention required.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 3
-    },
-    {
-      id: 'record-2-2',
-      userId: 'patient-2',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 120,
-      description: 'Diabetes management visit. HbA1c at 6.8%. Review of medication adherence and diet modifications. Blood glucose logs reviewed.',
-      summary: 'Diabetes follow-up. HbA1c controlled. Continue current management plan.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 120
-    }
-  ],
-  'patient-3': [
-    {
-      id: 'record-3-1',
-      userId: 'patient-3',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 7,
-      description: 'Sports injury evaluation. Patient presents with right ankle sprain from basketball. X-ray negative for fracture. Prescribed RICE protocol and follow-up in 2 weeks.',
-      summary: 'Right ankle sprain diagnosed. No fracture. Conservative management recommended.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 7
-    },
-    {
-      id: 'record-3-2',
-      userId: 'patient-3',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 200,
-      description: 'Mental health consultation. Patient discusses work-related stress and anxiety. Provided coping strategies and scheduled follow-up.',
-      summary: 'Anxiety management visit. Coping strategies discussed. Continued support recommended.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 200
-    }
-  ],
-  'patient-4': [
-    {
-      id: 'record-4-1',
-      userId: 'patient-4',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 10,
-      description: 'Prenatal care visit - 28 weeks gestation. Fetal heart rate normal at 145 bpm. Ultrasound shows normal development. Discussed nutrition and exercise.',
-      summary: 'Routine prenatal visit at 28 weeks. Normal fetal development. Continue standard prenatal care.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 10
-    }
-  ],
-  'patient-5': [
-    {
-      id: 'record-5-1',
-      userId: 'patient-5',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 2,
-      description: 'Post-operative follow-up for knee replacement surgery. Incision healing well. Physical therapy progressing. Range of motion improving.',
-      summary: 'Post-op knee replacement follow-up. Good healing progress. Continue PT regimen.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 2
-    },
-    {
-      id: 'record-5-2',
-      userId: 'patient-5',
-      recordDate: Math.floor(Date.now() / 1000) - 86400 * 30,
-      description: 'Pre-operative evaluation for knee replacement. Medical clearance provided. Surgical risks discussed. Patient informed consent obtained.',
-      summary: 'Pre-op evaluation completed. Patient cleared for knee replacement surgery.',
-      createdAt: Math.floor(Date.now() / 1000) - 86400 * 30
-    }
-  ]
-})
-
 export default function Dashboard() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
@@ -155,19 +28,6 @@ export default function Dashboard() {
   const [showRecordModal, setShowRecordModal] = useState(false)
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-  useEffect(() => {
-    // Try to fetch real data, but fall back to dummy data if API fails
-    fetchPatients()
-  }, [])
-
-  useEffect(() => {
-    if (selectedPatient) {
-      fetchPatientRecords(selectedPatient.id)
-    } else {
-      setRecords([])
-    }
-  }, [selectedPatient])
 
   const fetchPatients = async () => {
     try {
@@ -180,7 +40,6 @@ export default function Dashboard() {
         if (data && data.length > 0) {
           setPatients(data)
         } else {
-          // If API returns empty array, show empty state
           setPatients([])
         }
       } else {
@@ -203,14 +62,25 @@ export default function Dashboard() {
       })
       if (response.ok) {
         const data = await response.json()
+        interface RecordResponse {
+          id: string
+          patientId?: string
+          patient_id?: string
+          recordDate?: number
+          record_date?: number
+          description: string
+          summary: string | null
+          createdAt?: number
+          created_at?: number
+        }
         // Transform the data to match our interface
-        const transformedRecords: MedicalRecord[] = data.map((record: any) => ({
+        const transformedRecords: MedicalRecord[] = data.map((record: RecordResponse) => ({
           id: record.id,
-          userId: record.patientId || record.patient_id, // Handle both camelCase and snake_case
-          recordDate: record.recordDate || record.record_date,
+          userId: record.patientId || record.patient_id || '',
+          recordDate: record.recordDate || record.record_date || 0,
           description: record.description,
           summary: record.summary,
-          createdAt: record.createdAt || record.created_at,
+          createdAt: record.createdAt || record.created_at || 0,
         }))
         setRecords(transformedRecords)
       } else {
@@ -224,6 +94,20 @@ export default function Dashboard() {
       setRecordsLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchPatients()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (selectedPatient) {
+      fetchPatientRecords(selectedPatient.id)
+    } else {
+      setRecords([])
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPatient])
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000)
@@ -267,27 +151,25 @@ export default function Dashboard() {
     }
   }
 
-  const handleAddRecord = async (description: string, summary: string, recordDate: Date) => {
+  const handleAddRecord = async (file: File, description: string, recordDate: Date) => {
     if (!selectedPatient) return
 
     try {
-      const response = await fetch(`${apiUrl}/api/health/create/record`, {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('patientId', selectedPatient.id)
+      formData.append('description', description)
+      formData.append('recordDate', Math.floor(recordDate.getTime() / 1000).toString())
+      formData.append('generateSummary', 'true')
+
+      const response = await fetch(`${apiUrl}/api/health/upload-records`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         credentials: 'include',
-        body: JSON.stringify({
-          patientId: selectedPatient.id,
-          recordDate: Math.floor(recordDate.getTime() / 1000),
-          description,
-          summary: summary || null,
-          mimeType: 'text/plain',
-        }),
+        body: formData,
       })
 
       if (response.ok) {
-        const data = await response.json()
+        await response.json()
         // Refresh records list
         if (selectedPatient) {
           fetchPatientRecords(selectedPatient.id)
@@ -295,11 +177,11 @@ export default function Dashboard() {
         setShowRecordModal(false)
       } else {
         const error = await response.json()
-        alert('Failed to create record: ' + (error.error || 'Unknown error'))
+        alert('Failed to upload record: ' + (error.error || 'Unknown error'))
       }
     } catch (error) {
-      console.error('Error creating record:', error)
-      alert('Failed to create record. Please try again.')
+      console.error('Error uploading record:', error)
+      alert('Failed to upload record. Please try again.')
     }
   }
 
@@ -534,14 +416,36 @@ function AddRecordForm({
   onCancel,
   patientName,
 }: {
-  onSubmit: (description: string, summary: string, recordDate: Date) => void
+  onSubmit: (file: File, description: string, recordDate: Date) => void
   onCancel: () => void
   patientName: string
 }) {
   const [description, setDescription] = useState('')
-  const [summary, setSummary] = useState('')
   const [recordDate, setRecordDate] = useState(new Date().toISOString().split('T')[0])
+  const [file, setFile] = useState<File | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0]
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+      
+      if (!allowedTypes.includes(selectedFile.type)) {
+        alert('Invalid file type. Only PDF and image files are allowed.')
+        e.target.value = ''
+        return
+      }
+
+      const maxSize = 10 * 1024 * 1024 // 10MB
+      if (selectedFile.size > maxSize) {
+        alert('File too large. Maximum size is 10MB.')
+        e.target.value = ''
+        return
+      }
+
+      setFile(selectedFile)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -549,12 +453,16 @@ function AddRecordForm({
       alert('Please enter a description')
       return
     }
+    if (!file) {
+      alert('Please select a file')
+      return
+    }
 
     setSubmitting(true)
-    await onSubmit(description.trim(), summary.trim(), new Date(recordDate))
+    await onSubmit(file, description.trim(), new Date(recordDate))
     setSubmitting(false)
     setDescription('')
-    setSummary('')
+    setFile(null)
     setRecordDate(new Date().toISOString().split('T')[0])
   }
 
@@ -578,7 +486,25 @@ function AddRecordForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="description">Description</label>
+        <label htmlFor="file">Medical Record File *</label>
+        <input
+          id="file"
+          type="file"
+          onChange={handleFileChange}
+          accept=".pdf,image/*"
+          required
+          disabled={submitting}
+        />
+        {file && (
+          <div className="file-info">
+            Selected: {file.name} ({(file.size / 1024).toFixed(2)} KB)
+          </div>
+        )}
+        <small>Accepted formats: PDF, JPEG, PNG, GIF, WebP (max 10MB)</small>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="description">Description *</label>
         <textarea
           id="description"
           value={description}
@@ -586,20 +512,19 @@ function AddRecordForm({
           placeholder="Enter detailed description of the medical record..."
           rows={6}
           required
+          minLength={10}
+          maxLength={1000}
           disabled={submitting}
         />
+        <small>{description.length}/1000 characters</small>
       </div>
 
-      <div className="form-group">
-        <label htmlFor="summary">Summary (Optional)</label>
-        <textarea
-          id="summary"
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          placeholder="Enter a brief summary..."
-          rows={3}
-          disabled={submitting}
-        />
+      <div className="form-info">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginRight: '8px' }}>
+          <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+          <path d="M8 4v4M8 10v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+        AI will automatically generate a summary from the uploaded file
       </div>
 
       <div className="form-actions">
@@ -607,7 +532,7 @@ function AddRecordForm({
           Cancel
         </button>
         <button type="submit" className="btn-submit" disabled={submitting}>
-          {submitting ? 'Creating...' : 'Create Record'}
+          {submitting ? 'Uploading...' : 'Upload Record'}
         </button>
       </div>
     </form>
