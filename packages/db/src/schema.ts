@@ -25,7 +25,7 @@ export const patients = sqliteTable('patients', {
 
 export const medicalRecords = sqliteTable('medical_records', {
     id: text('id').primaryKey(),
-    userId: text('user_id')
+    patientId: text('patient_id')
         .notNull()
         .references(() => patients.id, { onDelete: 'cascade' }),
     recordDate: integer('record_date').notNull(),

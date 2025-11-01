@@ -1,0 +1,2 @@
+ALTER TABLE `medical_records` RENAME COLUMN "user_id" TO "patient_id";--> statement-breakpoint
+ALTER TABLE `medical_records` ALTER COLUMN "patient_id" TO "patient_id" text NOT NULL REFERENCES patients(id) ON DELETE cascade ON UPDATE no action;

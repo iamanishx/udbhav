@@ -15,6 +15,13 @@
       "when": 1761988886202,
       "tag": "0001_lowly_liz_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1762001788630,
+      "tag": "0002_concerned_bullseye",
+      "breakpoints": true
     }
   ]
 }

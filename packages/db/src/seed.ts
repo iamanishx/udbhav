@@ -1,5 +1,5 @@
 import { db } from './db';
-import { users, medicalRecords } from './schema';
+import { patients, medicalRecords } from './schema';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,35 +9,32 @@ async function seed() {
   try {
     console.log('Clearing existing data...');
     await db.delete(medicalRecords);
-    await db.delete(users);
+    await db.delete(patients);
     console.log('Existing data cleared');
 
-    console.log('Inserting users...');
-    const insertedUsers = await db.insert(users).values([
+    console.log('Inserting patients...');
+    const insertedPatients = await db.insert(patients).values([
       {
         id: 'abc123',
         username: 'john_doe',
         email: 'john@example.com',
-        summary: 'Software engineer with history of regular health checkups.',
       },
       {
         id: 'def456',
         username: 'jane_smith',
         email: 'jane@example.com',
-        summary: 'Marketing professional, follows vegetarian diet.',
       },
       {
         id: 'ghi789',
         username: 'bob_wilson',
         email: 'bob@example.com',
-        summary: 'Retired teacher, manages chronic condition with medication.',
       },
     ]).returning();
 
-    console.log(`Inserted ${insertedUsers.length} users`);
+    console.log(`Inserted ${insertedPatients.length} patients`);
 
-    if (insertedUsers.length < 3) {
-      throw new Error('Failed to insert all users');
+    if (insertedPatients.length < 3) {
+      throw new Error('Failed to insert all patients');
     }
 
     const pdfPath = path.resolve(__dirname, '../../../apps/server/src/assets/udbhav.pdf');
@@ -56,7 +53,7 @@ async function seed() {
     const recordsToInsert = [
       {
         id: 'record1',
-        userId: insertedUsers[0]!.id,
+        patientId: insertedPatients[0]!.id,
         recordDate: Math.floor(new Date('2024-01-15').getTime() / 1000),
         description: 'Annual physical examination - All vitals normal',
         data: pdfData,
@@ -65,43 +62,48 @@ async function seed() {
       },
       {
         id: 'record2',
-        userId: insertedUsers[0]!.id,
+        patientId: insertedPatients[0]!.id,
         recordDate: Math.floor(new Date('2024-06-20').getTime() / 1000),
         description: 'Blood test results',
         data: pdfData,
         mimeType: 'application/pdf',
+        summary: 'Complete blood count within normal ranges. Cholesterol levels slightly elevated.',
       },
       {
         id: 'record3',
-        userId: insertedUsers[1]!.id,
+        patientId: insertedPatients[1]!.id,
         recordDate: Math.floor(new Date('2024-03-10').getTime() / 1000),
         description: 'Dental checkup and cleaning',
         data: pdfData,
         mimeType: 'application/pdf',
+        summary: 'No cavities detected. Gums healthy. Recommended flossing more regularly.',
       },
       {
         id: 'record4',
-        userId: insertedUsers[1]!.id,
+        patientId: insertedPatients[1]!.id,
         recordDate: Math.floor(new Date('2024-08-05').getTime() / 1000),
         description: 'Eye examination',
         data: pdfData,
         mimeType: 'application/pdf',
+        summary: 'Vision test shows slight myopia progression. Updated prescription provided.',
       },
       {
         id: 'record5',
-        userId: insertedUsers[2]!.id,
+        patientId: insertedPatients[2]!.id,
         recordDate: Math.floor(new Date('2024-02-28').getTime() / 1000),
         description: 'Cardiology consultation',
         data: pdfData,
         mimeType: 'application/pdf',
+        summary: 'EKG normal. Blood pressure management improving with current medication regimen.',
       },
       {
         id: 'record6',
-        userId: insertedUsers[2]!.id,
+        patientId: insertedPatients[2]!.id,
         recordDate: Math.floor(new Date('2024-07-12').getTime() / 1000),
         description: 'Medication review and refill',
         data: pdfData,
         mimeType: 'application/pdf',
+        summary: 'Current medications effective. No adverse reactions reported. Refilled for 3 months.',
       },
     ];
 
@@ -110,7 +112,7 @@ async function seed() {
     console.log(`Inserted ${insertedRecords.length} medical records`);
     console.log('\n Database seeding completed successfully!');
     console.log(`\nSummary:`);
-    console.log(`- Users: ${insertedUsers.length}`);
+    console.log(`- Patients: ${insertedPatients.length}`);
     console.log(`- Medical Records: ${insertedRecords.length}`);
     
   } catch (error) {
