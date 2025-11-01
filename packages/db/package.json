@@ -18,7 +18,8 @@
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "bun run src/seed.ts"
+    "db:seed": "bun run src/seed.ts",
+    "db:embeddings": "bun run src/generate-embeddings.ts"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.2",
