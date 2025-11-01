@@ -22,6 +22,8 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
+// Mount auth routes at both /auth (for OAuth callbacks) and /api/auth (for API calls)
+app.route("/auth", auth);
 app.route("/api/auth", auth);
 app.route("/api/health", health);
 

@@ -175,7 +175,7 @@ auth.get('/google/callback', async (c) => {
       path: '/',
     })
 
-    return c.redirect(`${FRONTEND_URL}/?login=success`)
+    return c.redirect(`${FRONTEND_URL}/dashboard`)
   } catch (error) {
     console.error('OAuth callback error:', error)
     return c.redirect(`${FRONTEND_URL}/login?error=callback_failed`)
