@@ -6,10 +6,10 @@ dotenv.config({
 });
 
 export default defineConfig({
-	schema: "./src/schema",
+	schema: "./src/schema.ts",
 	out: "./src/migrations",
 	dialect: "turso",
 	dbCredentials: {
-		url: process.env.DATABASE_URL || "",
+		url: process.env.DATABASE_URL || "./memory.db",
 	},
 });
