@@ -22,7 +22,7 @@ export async function generateMedicalSummary(
   description?: string
 ): Promise<string> {
   try {
-    const prompt = description 
+    const prompt = description
       ? `Analyze this medical document and provide a concise clinical summary. Context: ${description}\n\nInclude:\n1. Key findings\n2. Diagnoses or conditions\n3. Treatments or medications mentioned\n4. Important vital signs or lab results\n5. Follow-up recommendations\n\nProvide a clear, professional summary suitable for electronic health records.`
       : `Analyze this medical document and provide a concise clinical summary including key findings, diagnoses, treatments, vital signs, and recommendations.`;
 
@@ -69,7 +69,7 @@ export async function generateDifferentialDiagnosis(
   }>;
 }> {
   try {
-    const context = patientHistory 
+    const context = patientHistory
       ? `Patient History: ${patientHistory}\n\nCurrent Clinical Notes: ${clinicalNotes}`
       : `Clinical Notes: ${clinicalNotes}`;
 

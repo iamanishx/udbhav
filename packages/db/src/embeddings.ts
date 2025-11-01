@@ -99,10 +99,10 @@ export async function generateAllMedicalRecordEmbeddings(): Promise<number> {
 export async function semanticSearchMedicalRecords(
   query: string,
   limit: number = 5,
-  userId?: string
+  patientId?: string
 ): Promise<Array<{
   id: string;
-  userId: string;
+  patientId: string;
   description: string;
   summary: string | null;
   recordDate: number;
@@ -114,18 +114,18 @@ export async function semanticSearchMedicalRecords(
   const results = await db.$client.prepare(`
     SELECT 
       mr.id,
-      mr.user_id as userId,
+      mr.patient_id as patientId,
       mr.description,
       mr.summary,
       mr.record_date as recordDate,
       (1.0 / (1.0 + vec_distance_L2(mre.embedding, ?))) as similarity
     FROM medical_records mr
     INNER JOIN medical_record_embeddings mre ON mr.id = mre.record_id
-    WHERE 1=1 ${userId ? 'AND mr.user_id = ?' : ''}
+    WHERE 1=1 ${patientId ? 'AND mr.patient_id = ?' : ''}
     ORDER BY similarity DESC
     LIMIT ?
   `).all(
-    ...(userId ? [queryBuffer, userId, limit] : [queryBuffer, limit])
+    ...(patientId ? [queryBuffer, patientId, limit] : [queryBuffer, limit])
   );
 
   return results as any[];
@@ -139,7 +139,7 @@ export async function findSimilarRecords(
   limit: number = 5
 ): Promise<Array<{
   id: string;
-  userId: string;
+  patientId: string;
   description: string;
   summary: string | null;
   similarity: number;
@@ -159,7 +159,7 @@ export async function findSimilarRecords(
   const results = await db.$client.prepare(`
     SELECT 
       mr.id,
-      mr.user_id as userId,
+      mr.patient_id as patientId,
       mr.description,
       mr.summary,
       (1.0 / (1.0 + vec_distance_L2(mre.embedding, ?))) as similarity

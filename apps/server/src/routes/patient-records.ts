@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
 import { uploadMedicalRecordDto, createPatientDto } from '../dtos/main.dtos'
-import { db, patients, medicalRecords } from '@udbhav/db'
+import { db, patients, medicalRecords, semanticSearchMedicalRecords, storeMedicalRecordEmbedding } from '@udbhav/db'
 import { v7 as uuidv7 } from 'uuid'
 import { jwtMiddleware } from './auth'
-import { generateMedicalSummary } from '../utils/ai'
+import { generateMedicalSummary, generateDifferentialDiagnosis } from '../utils/ai'
 
 const health = new Hono();
 
@@ -151,6 +151,15 @@ health.post('/upload-records', jwtMiddleware, async (c) => {
 
         console.log(`Medical record created: ${recordId}`);
 
+        if (summary) {
+            try {
+                await storeMedicalRecordEmbedding(recordId, summary);
+                console.log(`Embedding generated for record: ${recordId}`);
+            } catch (error) {
+                console.error('Failed to generate embedding:', error);
+            }
+        }
+
         return c.json({ 
             success: true, 
             record: {
@@ -169,6 +178,100 @@ health.post('/upload-records', jwtMiddleware, async (c) => {
         console.error('Failed to upload record:', e);
         return c.json({ 
             error: 'Failed to upload medical record',
+            details: e instanceof Error ? e.message : 'Unknown error'
+        }, 500);
+    }
+});
+
+health.post('/search/patient/:patientId', jwtMiddleware, async (c) => {
+    try {
+        const patientId = c.req.param('patientId');
+        const { query, limit = 5 } = await c.req.json();
+
+        if (!query || typeof query !== 'string') {
+            return c.json({ error: 'Query is required' }, 400);
+        }
+
+        const results = await semanticSearchMedicalRecords(query, limit, patientId);
+        console.log(`Patient ${patientId} search for query ${query} returned ${results} results`);
+        return c.json({
+            success: true,
+            patientId,
+            query,
+            results: results.map(r => ({
+                id: r.id,
+                description: r.description,
+                summary: r.summary,
+                recordDate: r.recordDate,
+                similarity: r.similarity,
+            })),
+        });
+    } catch (e) {
+        console.error('Patient search failed:', e);
+        return c.json({ 
+            error: 'Search failed',
+            details: e instanceof Error ? e.message : 'Unknown error'
+        }, 500);
+    }
+});
+
+health.post('/search/global', jwtMiddleware, async (c) => {
+    try {
+        const { query, limit = 10 } = await c.req.json();
+
+        if (!query || typeof query !== 'string') {
+            return c.json({ error: 'Query is required' }, 400);
+        }
+
+        const results = await semanticSearchMedicalRecords(query, limit);
+        console.log(`Global search for query ${query} returned ${results} results`);
+        const allPatients = await db.select().from(patients).execute();
+        const patientsMap = new Map(allPatients.map((p: any) => [p.id, p]));
+
+        return c.json({
+            success: true,
+            query,
+            results: results.map(r => {
+                const patient = patientsMap.get(r.patientId);
+                return {
+                    id: r.id,
+                    patientId: r.patientId,
+                    patientName: patient?.username || 'Unknown',
+                    patientEmail: patient?.email || '',
+                    description: r.description,
+                    summary: r.summary,
+                    recordDate: r.recordDate,
+                    similarity: r.similarity,
+                };
+            }),
+        });
+    } catch (e) {
+        console.error('Global search failed:', e);
+        return c.json({ 
+            error: 'Search failed',
+            details: e instanceof Error ? e.message : 'Unknown error'
+        }, 500);
+    }
+});
+
+health.post('/diagnose', jwtMiddleware, async (c) => {
+    try {
+        const { clinicalNotes, patientHistory } = await c.req.json();
+
+        if (!clinicalNotes || typeof clinicalNotes !== 'string') {
+            return c.json({ error: 'Clinical notes are required' }, 400);
+        }
+
+        const diagnosis = await generateDifferentialDiagnosis(clinicalNotes, patientHistory);
+
+        return c.json({
+            success: true,
+            ...diagnosis,
+        });
+    } catch (e) {
+        console.error('Diagnosis generation failed:', e);
+        return c.json({ 
+            error: 'Failed to generate diagnosis',
             details: e instanceof Error ? e.message : 'Unknown error'
         }, 500);
     }

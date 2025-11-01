@@ -19,6 +19,17 @@ interface MedicalRecord {
   createdAt: number
 }
 
+interface SearchResult {
+  id: string
+  patientId?: string
+  patientName?: string
+  patientEmail?: string
+  description: string
+  summary: string | null
+  recordDate: number
+  similarity: number
+}
+
 export default function Dashboard() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
@@ -27,6 +38,11 @@ export default function Dashboard() {
   const [recordsLoading, setRecordsLoading] = useState(false)
   const [showPatientModal, setShowPatientModal] = useState(false)
   const [showRecordModal, setShowRecordModal] = useState(false)
+  const [showSearchModal, setShowSearchModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searching, setSearching] = useState(false)
+  const [searchType, setSearchType] = useState<'patient' | 'global'>('patient')
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -149,6 +165,49 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error creating patient:', error)
       alert('Failed to create patient. Please try again.')
+    }
+  }
+
+  const handleSearch = async (query: string, type: 'patient' | 'global') => {
+    if (!query.trim()) {
+      alert('Please enter a search query')
+      return
+    }
+
+    if (type === 'patient' && !selectedPatient) {
+      alert('Please select a patient first')
+      return
+    }
+
+    try {
+      setSearching(true)
+      const endpoint = type === 'patient' 
+        ? `${apiUrl}/api/health/search/patient/${selectedPatient?.id}`
+        : `${apiUrl}/api/health/search/global`
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ query, limit: type === 'patient' ? 5 : 10 }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSearchResults(data.results || [])
+      } else {
+        const error = await response.json()
+        alert('Search failed: ' + (error.error || 'Unknown error'))
+        setSearchResults([])
+      }
+    } catch (error) {
+      console.error('Error searching:', error)
+      alert('Search failed. Please try again.')
+      setSearchResults([])
+    } finally {
+      setSearching(false)
     }
   }
 
@@ -288,12 +347,38 @@ export default function Dashboard() {
           <div className="records-container">
             <div className="records-header">
               <h1>{selectedPatient.username}'s Medical History</h1>
-              <button className="add-record-btn-header" onClick={() => setShowRecordModal(true)}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                Add Record
-              </button>
+              <div className="records-actions">
+                <button className="search-btn-header" onClick={() => {
+                  setSearchType('patient')
+                  setShowSearchModal(true)
+                  setSearchResults([])
+                  setSearchQuery('')
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  Search Patient
+                </button>
+                <button className="search-btn-header" onClick={() => {
+                  setSearchType('global')
+                  setShowSearchModal(true)
+                  setSearchResults([])
+                  setSearchQuery('')
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M2 8h12M8 2a10 10 0 0 1 0 12 10 10 0 0 1 0-12" stroke="currentColor" strokeWidth="1.5"/>
+                  </svg>
+                  Global Search
+                </button>
+                <button className="add-record-btn-header" onClick={() => setShowRecordModal(true)}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  Add Record
+                </button>
+              </div>
             </div>
 
             <div className="records-list">
@@ -346,6 +431,26 @@ export default function Dashboard() {
             patientName={selectedPatient.username}
           />
         )}
+      </Modal>
+
+      {/* Search Modal */}
+      <Modal
+        isOpen={showSearchModal}
+        onClose={() => {
+          setShowSearchModal(false)
+          setSearchResults([])
+          setSearchQuery('')
+        }}
+        title={searchType === 'patient' ? `Search: ${selectedPatient?.username || 'Patient'}` : 'Global Search - All Patients'}
+      >
+        <SearchForm
+          query={searchQuery}
+          onQueryChange={setSearchQuery}
+          onSearch={() => handleSearch(searchQuery, searchType)}
+          searching={searching}
+          results={searchResults}
+          searchType={searchType}
+        />
       </Modal>
     </div>
   )
@@ -542,3 +647,137 @@ function AddRecordForm({
   )
 }
 
+function SearchForm({
+  query,
+  onQueryChange,
+  onSearch,
+  searching,
+  results,
+  searchType,
+}: {
+  query: string
+  onQueryChange: (query: string) => void
+  onSearch: () => void
+  searching: boolean
+  results: SearchResult[]
+  searchType: 'patient' | 'global'
+}) {
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp * 1000)
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSearch()
+  }
+
+  return (
+    <div className="search-form">
+      <form onSubmit={handleSubmit}>
+        <div className="search-input-group">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder={searchType === 'patient' 
+              ? "Search patient's records (e.g., diabetes, chest pain, fever)"
+              : "Search all records (e.g., acute myocardial infarction, pneumonia)"}
+            disabled={searching}
+            className="search-input"
+          />
+          <button type="submit" disabled={searching || !query.trim()} className="search-submit-btn">
+            {searching ? (
+              <>
+                <div className="search-spinner"></div>
+                Searching...
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                Search
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+
+      <div className="search-info-banner">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+          <path d="M8 4v4M8 10v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+        {searchType === 'patient' 
+          ? "AI-powered semantic search within this patient's medical history"
+          : "AI-powered semantic search across all patients to find similar cases"}
+      </div>
+
+      {results.length > 0 && (
+        <div className="search-results">
+          <div className="search-results-header">
+            <span className="results-count">{results.length} {results.length === 1 ? 'result' : 'results'} found</span>
+          </div>
+          <div className="search-results-list">
+            {results.map((result, index) => (
+              <div key={result.id || index} className="search-result-card">
+                <div className="result-header">
+                  <div className="result-similarity">
+                    <div className="similarity-bar">
+                      <div 
+                        className="similarity-fill" 
+                        style={{ width: `${(result.similarity * 100).toFixed(0)}%` }}
+                      ></div>
+                    </div>
+                    <span className="similarity-text">{(result.similarity * 100).toFixed(0)}% match</span>
+                  </div>
+                  <span className="result-date">{formatDate(result.recordDate)}</span>
+                </div>
+                
+                {searchType === 'global' && result.patientName && (
+                  <div className="result-patient-info">
+                    <div className="patient-avatar-small">
+                      {result.patientName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="patient-name-small">{result.patientName}</div>
+                      <div className="patient-email-small">{result.patientEmail || ''}</div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="result-description">{result.description}</div>
+                
+                {result.summary && (
+                  <div className="result-summary">
+                    <div className="result-summary-label">AI Summary:</div>
+                    <div className="result-summary-content markdown-content">
+                      <ReactMarkdown>{result.summary}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!searching && results.length === 0 && query && (
+        <div className="no-results">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <p>No matching records found</p>
+          <small>Try different keywords or check if embeddings are generated</small>
+        </div>
+      )}
+    </div>
+  )
+}
