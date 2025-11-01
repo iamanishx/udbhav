@@ -179,19 +179,51 @@ print_step "Configuring Caddy..."
 
 # Ensure log directory exists
 sudo mkdir -p /var/log/caddy
-sudo chown -R caddy:caddy /var/log/caddy
+sudo chown -R caddy:caddy /var/log/caddy 2>/dev/null || sudo chown -R root:root /var/log/caddy
 
 # Copy Caddyfile to Caddy config location
 sudo cp Caddyfile /etc/caddy/Caddyfile
-sudo chown caddy:caddy /etc/caddy/Caddyfile
+
+# Validate Caddyfile
+print_step "Validating Caddyfile..."
+if sudo caddy validate --config /etc/caddy/Caddyfile; then
+    print_success "Caddyfile is valid"
+else
+    print_error "Caddyfile validation failed!"
+    exit 1
+fi
 
 # Check if Caddy is running, if not start it, otherwise reload
 if sudo systemctl is-active --quiet caddy; then
-    sudo systemctl reload caddy
-    print_success "Caddy reloaded"
+    print_step "Reloading Caddy..."
+    if sudo systemctl reload caddy; then
+        print_success "Caddy reloaded"
+    else
+        print_error "Caddy reload failed, trying restart..."
+        sudo systemctl restart caddy
+        print_success "Caddy restarted"
+    fi
 else
-    sudo systemctl start caddy
-    print_success "Caddy started"
+    print_step "Starting Caddy..."
+    if sudo systemctl start caddy; then
+        print_success "Caddy started"
+    else
+        print_error "Caddy failed to start!"
+        echo ""
+        echo "Checking logs:"
+        sudo journalctl -u caddy -n 10 --no-pager
+        echo ""
+        echo "Run 'bash fix-caddy.sh' to diagnose the issue"
+        exit 1
+    fi
+fi
+
+# Verify Caddy is running
+if sudo systemctl is-active --quiet caddy; then
+    print_success "Caddy is running"
+else
+    print_error "Caddy is not running!"
+    exit 1
 fi
 
 # Step 11: Display status
