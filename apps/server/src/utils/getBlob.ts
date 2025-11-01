@@ -1,7 +1,7 @@
 import { db, medicalRecords } from '@udbhav/db';
 import { eq } from 'drizzle-orm';
 
-export async function getBlob(id: number): Promise<Uint8Array | null> {
+export async function getBlob(id: string): Promise<Uint8Array | null> {
   const result = await db
     .select()
     .from(medicalRecords)

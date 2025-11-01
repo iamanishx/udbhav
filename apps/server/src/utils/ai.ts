@@ -45,7 +45,7 @@ export async function generateOcrResponse(prompt: string, file: Uint8Array) {
 }
 
 try {
-  const file = await getBlob(1);
+  const file = await getBlob('record1');
   await generateOcrResponse("Summarize the content of the document.", file!)
 } catch (e) {
   console.error("Error getting blob:", e);

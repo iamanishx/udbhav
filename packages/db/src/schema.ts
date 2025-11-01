@@ -9,7 +9,7 @@ import { relations } from 'drizzle-orm';
 
 
 export const users = sqliteTable('users', {
-    id: integer('id').primaryKey(),
+    id: text('id').primaryKey(),
     username: text('username').notNull().unique(),
     email: text('email').notNull().unique(),
     createdAt: integer('created_at').notNull().default(sql`(strftime('%s', 'now'))`),
@@ -17,8 +17,8 @@ export const users = sqliteTable('users', {
 });
 
 export const medicalRecords = sqliteTable('medical_records', {
-    id: integer('id').primaryKey(),
-    userId: integer('user_id')
+    id: text('id').primaryKey(),
+    userId: text('user_id')
         .notNull()
         .references(() => users.id, { onDelete: 'cascade' }),
     recordDate: integer('record_date').notNull(),

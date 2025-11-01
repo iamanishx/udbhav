@@ -15,19 +15,19 @@ async function seed() {
     console.log('Inserting users...');
     const insertedUsers = await db.insert(users).values([
       {
-        id: 1,
+        id: 'abc123',
         username: 'john_doe',
         email: 'john@example.com',
         summary: 'Software engineer with history of regular health checkups.',
       },
       {
-        id: 2,
+        id: 'def456',
         username: 'jane_smith',
         email: 'jane@example.com',
         summary: 'Marketing professional, follows vegetarian diet.',
       },
       {
-        id: 3,
+        id: 'ghi789',
         username: 'bob_wilson',
         email: 'bob@example.com',
         summary: 'Retired teacher, manages chronic condition with medication.',
@@ -55,7 +55,7 @@ async function seed() {
     
     const recordsToInsert = [
       {
-        id: 1,
+        id: 'record1',
         userId: insertedUsers[0]!.id,
         recordDate: Math.floor(new Date('2024-01-15').getTime() / 1000),
         description: 'Annual physical examination - All vitals normal',
@@ -64,49 +64,44 @@ async function seed() {
         summary: 'Routine checkup showing good overall health. Blood pressure: 120/80, Heart rate: 72 bpm.',
       },
       {
-        id: 2,
+        id: 'record2',
         userId: insertedUsers[0]!.id,
         recordDate: Math.floor(new Date('2024-06-20').getTime() / 1000),
         description: 'Blood test results',
         data: pdfData,
         mimeType: 'application/pdf',
-        summary: 'Complete blood count within normal ranges. Cholesterol levels slightly elevated.',
       },
       {
-        id: 3,
+        id: 'record3',
         userId: insertedUsers[1]!.id,
         recordDate: Math.floor(new Date('2024-03-10').getTime() / 1000),
         description: 'Dental checkup and cleaning',
         data: pdfData,
         mimeType: 'application/pdf',
-        summary: 'No cavities detected. Gums healthy. Recommended flossing more regularly.',
       },
       {
-        id: 4,
+        id: 'record4',
         userId: insertedUsers[1]!.id,
         recordDate: Math.floor(new Date('2024-08-05').getTime() / 1000),
         description: 'Eye examination',
         data: pdfData,
         mimeType: 'application/pdf',
-        summary: 'Vision test shows slight myopia progression. Updated prescription provided.',
       },
       {
-        id: 5,
+        id: 'record5',
         userId: insertedUsers[2]!.id,
         recordDate: Math.floor(new Date('2024-02-28').getTime() / 1000),
         description: 'Cardiology consultation',
         data: pdfData,
         mimeType: 'application/pdf',
-        summary: 'EKG normal. Blood pressure management improving with current medication regimen.',
       },
       {
-        id: 6,
+        id: 'record6',
         userId: insertedUsers[2]!.id,
         recordDate: Math.floor(new Date('2024-07-12').getTime() / 1000),
         description: 'Medication review and refill',
         data: pdfData,
         mimeType: 'application/pdf',
-        summary: 'Current medications effective. No adverse reactions reported. Refilled for 3 months.',
       },
     ];
 
