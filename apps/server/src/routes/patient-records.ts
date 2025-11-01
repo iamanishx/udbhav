@@ -217,7 +217,7 @@ health.post('/search/patient/:patientId', jwtMiddleware, async (c) => {
 
 health.post('/search/global', jwtMiddleware, async (c) => {
     try {
-        const { query, limit = 10 } = await c.req.json();
+        const { query, limit = 3 } = await c.req.json();
 
         if (!query || typeof query !== 'string') {
             return c.json({ error: 'Query is required' }, 400);

@@ -98,7 +98,7 @@ export async function generateAllMedicalRecordEmbeddings(): Promise<number> {
  */
 export async function semanticSearchMedicalRecords(
   query: string,
-  limit: number = 5,
+  limit: number = 2,
   patientId?: string
 ): Promise<Array<{
   id: string;
