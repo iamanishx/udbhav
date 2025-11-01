@@ -100,12 +100,10 @@ Format your response as JSON:
       prompt: prompt,
     });
 
-    // Try to parse JSON response
     try {
       const parsed = JSON.parse(result.text);
       return parsed;
     } catch {
-      // Fallback if not valid JSON
       return {
         summary: result.text,
         differentials: [],

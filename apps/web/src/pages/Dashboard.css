@@ -457,6 +457,155 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* Markdown content styling */
+.markdown-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  color: var(--color-lightest);
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.markdown-content h1 {
+  font-size: 1.5em;
+  border-bottom: 2px solid rgba(168, 213, 186, 0.2);
+  padding-bottom: 0.3em;
+}
+
+.markdown-content h2 {
+  font-size: 1.3em;
+  border-bottom: 1px solid rgba(168, 213, 186, 0.15);
+  padding-bottom: 0.3em;
+}
+
+.markdown-content h3 {
+  font-size: 1.15em;
+}
+
+.markdown-content h4 {
+  font-size: 1.05em;
+}
+
+.markdown-content p {
+  margin-bottom: 0.8em;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.8em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-content li {
+  margin-bottom: 0.4em;
+  line-height: 1.6;
+}
+
+.markdown-content li:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content strong,
+.markdown-content b {
+  font-weight: 600;
+  color: var(--color-light);
+}
+
+.markdown-content em,
+.markdown-content i {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.markdown-content code {
+  background: rgba(107, 191, 138, 0.1);
+  color: var(--color-light);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
+.markdown-content pre {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(168, 213, 186, 0.2);
+  border-radius: 6px;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.markdown-content pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.85em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid var(--color-medium);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid rgba(168, 213, 186, 0.2);
+  margin: 1.5em 0;
+}
+
+.markdown-content a {
+  color: var(--color-light);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.markdown-content a:hover {
+  border-bottom-color: var(--color-light);
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+  padding: 0.5em;
+  border: 1px solid rgba(168, 213, 186, 0.2);
+  text-align: left;
+}
+
+.markdown-content th {
+  background: rgba(107, 191, 138, 0.1);
+  color: var(--color-lightest);
+  font-weight: 600;
+}
+
+.markdown-content td {
+  background: rgba(0, 0, 0, 0.2);
+}
+
 .record-footer {
   margin-top: 16px;
   padding-top: 12px;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './Dashboard.css'
 import Modal from '../components/Modal'
+import ReactMarkdown from 'react-markdown'
 
 interface Patient {
   id: string
@@ -307,8 +308,10 @@ export default function Dashboard() {
                   <div className="record-description">{record.description}</div>
                   {record.summary && (
                     <div className="record-summary">
-                      <div className="summary-label">Summary:</div>
-                      <div className="summary-content">{record.summary}</div>
+                      <div className="summary-label">AI Summary:</div>
+                      <div className="summary-content markdown-content">
+                        <ReactMarkdown>{record.summary}</ReactMarkdown>
+                      </div>
                     </div>
                   )}
                   <div className="record-footer">
