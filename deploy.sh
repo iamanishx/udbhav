@@ -177,12 +177,22 @@ print_success "Services started with PM2"
 # Step 10: Setup Caddy
 print_step "Configuring Caddy..."
 
+# Ensure log directory exists
+sudo mkdir -p /var/log/caddy
+sudo chown -R caddy:caddy /var/log/caddy
+
 # Copy Caddyfile to Caddy config location
 sudo cp Caddyfile /etc/caddy/Caddyfile
+sudo chown caddy:caddy /etc/caddy/Caddyfile
 
-# Reload Caddy
-sudo systemctl reload caddy
-print_success "Caddy configured and reloaded"
+# Check if Caddy is running, if not start it, otherwise reload
+if sudo systemctl is-active --quiet caddy; then
+    sudo systemctl reload caddy
+    print_success "Caddy reloaded"
+else
+    sudo systemctl start caddy
+    print_success "Caddy started"
+fi
 
 # Step 11: Display status
 echo ""
