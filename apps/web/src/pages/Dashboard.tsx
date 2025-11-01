@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './Dashboard.css'
+import Modal from '../components/Modal'
 
 interface Patient {
   id: string
@@ -150,6 +151,8 @@ export default function Dashboard() {
   const [records, setRecords] = useState<MedicalRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [recordsLoading, setRecordsLoading] = useState(false)
+  const [showPatientModal, setShowPatientModal] = useState(false)
+  const [showRecordModal, setShowRecordModal] = useState(false)
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -169,7 +172,7 @@ export default function Dashboard() {
   const fetchPatients = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${apiUrl}/api/patients`, {
+      const response = await fetch(`${apiUrl}/api/health/patients`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -177,17 +180,16 @@ export default function Dashboard() {
         if (data && data.length > 0) {
           setPatients(data)
         } else {
-          // Fall back to dummy data if API returns empty
-          setPatients(getDummyPatients())
+          // If API returns empty array, show empty state
+          setPatients([])
         }
       } else {
-        // Fall back to dummy data if API fails
-        setPatients(getDummyPatients())
+        console.error('Failed to fetch patients:', response.status)
+        setPatients([])
       }
     } catch (error) {
       console.error('Error fetching patients:', error)
-      // Fall back to dummy data on error
-      setPatients(getDummyPatients())
+      setPatients([])
     } finally {
       setLoading(false)
     }
@@ -196,25 +198,28 @@ export default function Dashboard() {
   const fetchPatientRecords = async (patientId: string) => {
     try {
       setRecordsLoading(true)
-      const response = await fetch(`${apiUrl}/api/patients/${patientId}/records`, {
+      const response = await fetch(`${apiUrl}/api/health/patients/${patientId}/records`, {
         credentials: 'include'
       })
       if (response.ok) {
         const data = await response.json()
-        if (data && data.length > 0) {
-          setRecords(data)
-        } else {
-          // Fall back to dummy data if API returns empty
-          setRecords(getDummyRecords()[patientId] || [])
-        }
+        // Transform the data to match our interface
+        const transformedRecords: MedicalRecord[] = data.map((record: any) => ({
+          id: record.id,
+          userId: record.patientId || record.patient_id, // Handle both camelCase and snake_case
+          recordDate: record.recordDate || record.record_date,
+          description: record.description,
+          summary: record.summary,
+          createdAt: record.createdAt || record.created_at,
+        }))
+        setRecords(transformedRecords)
       } else {
-        // Fall back to dummy data if API fails
-        setRecords(getDummyRecords()[patientId] || [])
+        console.error('Failed to fetch patient records:', response.status)
+        setRecords([])
       }
     } catch (error) {
       console.error('Error fetching records:', error)
-      // Fall back to dummy data on error
-      setRecords(getDummyRecords()[patientId] || [])
+      setRecords([])
     } finally {
       setRecordsLoading(false)
     }
@@ -237,13 +242,74 @@ export default function Dashboard() {
     })
   }
 
+  const handleAddPatient = async (username: string, email: string) => {
+    try {
+      const response = await fetch(`${apiUrl}/api/health/create/patient`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ username, email }),
+      })
+
+      if (response.ok) {
+        // Refresh patient list
+        fetchPatients()
+        setShowPatientModal(false)
+      } else {
+        const error = await response.json()
+        alert('Failed to create patient: ' + (error.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error creating patient:', error)
+      alert('Failed to create patient. Please try again.')
+    }
+  }
+
+  const handleAddRecord = async (description: string, summary: string, recordDate: Date) => {
+    if (!selectedPatient) return
+
+    try {
+      const response = await fetch(`${apiUrl}/api/health/create/record`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          patientId: selectedPatient.id,
+          recordDate: Math.floor(recordDate.getTime() / 1000),
+          description,
+          summary: summary || null,
+          mimeType: 'text/plain',
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Refresh records list
+        if (selectedPatient) {
+          fetchPatientRecords(selectedPatient.id)
+        }
+        setShowRecordModal(false)
+      } else {
+        const error = await response.json()
+        alert('Failed to create record: ' + (error.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error creating record:', error)
+      alert('Failed to create record. Please try again.')
+    }
+  }
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
       <div className="dashboard-sidebar">
         <div className="sidebar-header">
           <h2>Patients</h2>
-          <button className="new-chat-btn" title="New Patient">
+          <button className="new-chat-btn" title="New Patient" onClick={() => setShowPatientModal(true)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
@@ -319,9 +385,17 @@ export default function Dashboard() {
               </svg>
               <h2>No medical records</h2>
               <p>This patient doesn't have any medical records yet.</p>
-              <button className="add-record-btn" onClick={() => {/* Handle add record */}}>
+              <button 
+                className="add-record-btn" 
+                onClick={() => {
+                  if (selectedPatient) {
+                    setShowRecordModal(true)
+                  }
+                }}
+                type="button"
+              >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
                 Add Record
               </button>
@@ -331,7 +405,7 @@ export default function Dashboard() {
           <div className="records-container">
             <div className="records-header">
               <h1>{selectedPatient.username}'s Medical History</h1>
-              <button className="add-record-btn-header" onClick={() => {/* Handle add record */}}>
+              <button className="add-record-btn-header" onClick={() => setShowRecordModal(true)}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
@@ -364,7 +438,179 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Add Patient Modal */}
+      <Modal
+        isOpen={showPatientModal}
+        onClose={() => setShowPatientModal(false)}
+        title="Add New Patient"
+      >
+        <AddPatientForm onSubmit={handleAddPatient} onCancel={() => setShowPatientModal(false)} />
+      </Modal>
+
+      {/* Add Record Modal */}
+      <Modal
+        isOpen={showRecordModal && !!selectedPatient}
+        onClose={() => setShowRecordModal(false)}
+        title="Add Medical Record"
+      >
+        {selectedPatient && (
+          <AddRecordForm
+            onSubmit={handleAddRecord}
+            onCancel={() => setShowRecordModal(false)}
+            patientName={selectedPatient.username}
+          />
+        )}
+      </Modal>
     </div>
+  )
+}
+
+// Add Patient Form Component
+function AddPatientForm({ onSubmit, onCancel }: { onSubmit: (username: string, email: string) => void; onCancel: () => void }) {
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!username.trim() || !email.trim()) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    setSubmitting(true)
+    await onSubmit(username.trim(), email.trim())
+    setSubmitting(false)
+    setUsername('')
+    setEmail('')
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="modal-form">
+      <div className="form-group">
+        <label htmlFor="username">Patient Name</label>
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter patient name"
+          required
+          minLength={3}
+          maxLength={30}
+          disabled={submitting}
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="patient@example.com"
+          required
+          disabled={submitting}
+        />
+      </div>
+
+      <div className="form-actions">
+        <button type="button" className="btn-cancel" onClick={onCancel} disabled={submitting}>
+          Cancel
+        </button>
+        <button type="submit" className="btn-submit" disabled={submitting}>
+          {submitting ? 'Creating...' : 'Create Patient'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+// Add Record Form Component
+function AddRecordForm({
+  onSubmit,
+  onCancel,
+  patientName,
+}: {
+  onSubmit: (description: string, summary: string, recordDate: Date) => void
+  onCancel: () => void
+  patientName: string
+}) {
+  const [description, setDescription] = useState('')
+  const [summary, setSummary] = useState('')
+  const [recordDate, setRecordDate] = useState(new Date().toISOString().split('T')[0])
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!description.trim()) {
+      alert('Please enter a description')
+      return
+    }
+
+    setSubmitting(true)
+    await onSubmit(description.trim(), summary.trim(), new Date(recordDate))
+    setSubmitting(false)
+    setDescription('')
+    setSummary('')
+    setRecordDate(new Date().toISOString().split('T')[0])
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="modal-form">
+      <div className="form-group">
+        <label>Patient</label>
+        <div className="form-readonly">{patientName || 'No patient selected'}</div>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="recordDate">Record Date</label>
+        <input
+          id="recordDate"
+          type="date"
+          value={recordDate}
+          onChange={(e) => setRecordDate(e.target.value)}
+          required
+          disabled={submitting}
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="description">Description</label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Enter detailed description of the medical record..."
+          rows={6}
+          required
+          disabled={submitting}
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="summary">Summary (Optional)</label>
+        <textarea
+          id="summary"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          placeholder="Enter a brief summary..."
+          rows={3}
+          disabled={submitting}
+        />
+      </div>
+
+      <div className="form-actions">
+        <button type="button" className="btn-cancel" onClick={onCancel} disabled={submitting}>
+          Cancel
+        </button>
+        <button type="submit" className="btn-submit" disabled={submitting}>
+          {submitting ? 'Creating...' : 'Create Record'}
+        </button>
+      </div>
+    </form>
   )
 }
 

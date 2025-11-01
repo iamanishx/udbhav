@@ -244,23 +244,50 @@
 .add-record-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px 24px;
   background: linear-gradient(135deg, var(--color-light) 0%, var(--color-medium) 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(107, 191, 138, 0.3);
+  white-space: nowrap;
+  line-height: 1.5;
+  vertical-align: middle;
 }
 
 .add-record-btn:hover {
   background: linear-gradient(135deg, var(--color-lightest) 0%, var(--color-light) 100%);
   box-shadow: 0 6px 16px rgba(168, 213, 186, 0.4);
   transform: translateY(-1px);
+}
+
+.add-record-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(107, 191, 138, 0.3);
+}
+
+.add-record-btn svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+.add-record-btn svg path {
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
 .loading-records {
