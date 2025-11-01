@@ -7,6 +7,12 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    allowedHosts: [
+      'bancodeweb.techsoc-iiitbbsr.com',
+      'localhost',
+      '127.0.0.1',
+      '.techsoc-iiitbbsr.com'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
