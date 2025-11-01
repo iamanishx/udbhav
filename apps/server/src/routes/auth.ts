@@ -1,13 +1,14 @@
 import { Hono } from 'hono'
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
 import { sign, verify } from 'hono/jwt'
+import { db, users } from '@udbhav/db';
+import { v7 as uuid7 } from 'uuid';
+
 
 const auth = new Hono()
 
-// Store for session tokens (in production, use Redis or a database)
 const sessions = new Map<string, { email: string; name: string; picture: string; exp: number }>()
 
-// JWT secret - should be in env variable
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-this'
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || ''
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || ''
@@ -24,11 +25,8 @@ interface GoogleTokenPayload {
   iat: number
 }
 
-// Verify Google ID token
 async function verifyGoogleToken(token: string): Promise<GoogleTokenPayload | null> {
   try {
-    // Decode JWT without verification (for development)
-    // In production, you should verify the signature using Google's public keys
     const parts = token.split('.')
     if (parts.length !== 3) {
       return null
@@ -43,14 +41,12 @@ async function verifyGoogleToken(token: string): Promise<GoogleTokenPayload | nu
       Buffer.from(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()
     )
 
-    // Basic validation
     const clientId = process.env.GOOGLE_CLIENT_ID
     if (clientId && payload.aud !== clientId) {
       console.error('Token audience mismatch')
       return null
     }
 
-    // Check if token is expired
     if (payload.exp * 1000 < Date.now()) {
       console.error('Token expired')
       return null
@@ -63,65 +59,6 @@ async function verifyGoogleToken(token: string): Promise<GoogleTokenPayload | nu
   }
 }
 
-// POST /api/auth/google - Verify Google token and create session
-auth.post('/google', async (c) => {
-  try {
-    const { token } = await c.req.json()
-    
-    if (!token) {
-      return c.json({ error: 'Token required' }, 400)
-    }
-
-    // Verify the Google token
-    const payload = await verifyGoogleToken(token)
-    
-    if (!payload) {
-      return c.json({ error: 'Invalid token' }, 401)
-    }
-
-    // Create session token
-    const sessionToken = await sign(
-      {
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days
-      },
-      JWT_SECRET
-    )
-
-    // Store session
-    sessions.set(sessionToken, {
-      email: payload.email,
-      name: payload.name,
-      picture: payload.picture,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
-    })
-
-    // Set HTTP-only cookie
-    setCookie(c, 'session', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/',
-    })
-
-    return c.json({
-      success: true,
-      user: {
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-      },
-    })
-  } catch (error) {
-    console.error('Authentication error:', error)
-    return c.json({ error: 'Authentication failed' }, 500)
-  }
-})
-
-// GET /api/auth/me - Get current user
 auth.get('/me', async (c) => {
   try {
     const sessionToken = getCookie(c, 'session')
@@ -130,7 +67,6 @@ auth.get('/me', async (c) => {
       return c.json({ error: 'Not authenticated' }, 401)
     }
 
-    // Verify session token
     const payload = await verify(sessionToken, JWT_SECRET)
     
     if (!payload || typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) {
@@ -151,7 +87,6 @@ auth.get('/me', async (c) => {
   }
 })
 
-// GET /api/auth/google - Initiate Google OAuth flow
 auth.get('/google', async (c) => {
   const redirectUri = `${c.req.url.split('/api')[0]}/auth/google/callback`
   
@@ -166,7 +101,6 @@ auth.get('/google', async (c) => {
   return c.redirect(googleAuthUrl.toString())
 })
 
-// GET /auth/google/callback - Handle OAuth callback
 auth.get('/google/callback', async (c) => {
   try {
     const code = c.req.query('code')
@@ -181,7 +115,6 @@ auth.get('/google/callback', async (c) => {
       return c.redirect(`${FRONTEND_URL}/login?error=no_code`)
     }
 
-    // Exchange authorization code for tokens
     const redirectUri = `${c.req.url.split('/auth')[0]}/auth/google/callback`
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -205,25 +138,28 @@ auth.get('/google/callback', async (c) => {
 
     const tokens = await tokenResponse.json() as { id_token: string; access_token: string }
 
-    // Verify and decode the ID token
     const payload = await verifyGoogleToken(tokens.id_token)
 
     if (!payload) {
       return c.redirect(`${FRONTEND_URL}/login?error=invalid_token`)
     }
-
-    // Create session token
+    try{
+      await db.insert(users).values({
+        id: uuid7(),
+        email: payload.email,
+        username: payload.name,
+      }).onConflictDoNothing().execute()
+    }catch(e){}
     const sessionToken = await sign(
       {
         email: payload.email,
         name: payload.name,
         picture: payload.picture,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
       },
       JWT_SECRET
     )
 
-    // Store session
     sessions.set(sessionToken, {
       email: payload.email,
       name: payload.name,
@@ -231,16 +167,14 @@ auth.get('/google/callback', async (c) => {
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
     })
 
-    // Set HTTP-only cookie
     setCookie(c, 'session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     })
 
-    // Redirect back to frontend
     return c.redirect(`${FRONTEND_URL}/?login=success`)
   } catch (error) {
     console.error('OAuth callback error:', error)
@@ -248,7 +182,6 @@ auth.get('/google/callback', async (c) => {
   }
 })
 
-// POST /api/auth/logout - Logout user
 auth.post('/logout', async (c) => {
   try {
     const sessionToken = getCookie(c, 'session')

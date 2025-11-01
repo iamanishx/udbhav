@@ -10,9 +10,11 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
+    "@types/uuid": "^11.0.0",
     "@udbhav/db": "workspace:*",
     "dotenv": "catalog:",
     "hono": "^4.8.2",
+    "uuid": "^13.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {
