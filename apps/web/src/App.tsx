@@ -123,7 +123,7 @@ function Landing() {
 
             <div className="tech-card">
               <div className="tech-icon"></div>
-              <h3>FreeMemories RAG System</h3>
+              <h3>FreeMemory RAG System</h3>
               <p>
                 Brain-inspired memory architecture that organizes patient records hierarchically with 
                 decay-based prioritization. Critical information stays accessible while maintaining context.
