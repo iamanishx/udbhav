@@ -23,6 +23,7 @@ export default defineConfig({
       '127.0.0.1',
       '.techsoc-iiitbbsr.com'
     ],
+    origin: 'https://bancodeweb.techsoc-iiitbbsr.com',
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
