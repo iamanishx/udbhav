@@ -15,7 +15,7 @@ export default function Login() {
   const handleGoogleLogin = () => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
     // Redirect to backend OAuth initiation endpoint
-    window.location.href = `${apiUrl}/auth/google`
+    window.location.href = `${apiUrl}/api/auth/google`
   }
 
   return (
