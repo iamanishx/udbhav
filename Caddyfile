@@ -10,6 +10,11 @@ bancodeweb.techsoc-iiitbbsr.com {
         reverse_proxy localhost:3000
     }
 
+    # Auth routes - proxy to backend server
+    handle /auth/* {
+        reverse_proxy localhost:3000
+    }
+
     # WebSocket support for HMR (Hot Module Replacement)
     @websockets {
         header Connection *Upgrade*
