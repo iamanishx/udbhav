@@ -88,7 +88,7 @@ auth.get('/me', async (c) => {
 })
 
 auth.get('/google', async (c) => {
-  const redirectUri = `${c.req.url.split('/api')[0]}/auth/google/callback`
+  const redirectUri = `${new URL(c.req.url).origin}/api/auth/google/callback`
   
   const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
   googleAuthUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID)
@@ -115,7 +115,7 @@ auth.get('/google/callback', async (c) => {
       return c.redirect(`${FRONTEND_URL}/login?error=no_code`)
     }
 
-    const redirectUri = `${c.req.url.split('/auth')[0]}/auth/google/callback`
+    const redirectUri = `${new URL(c.req.url).origin}/api/auth/google/callback`
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: {
@@ -175,7 +175,8 @@ auth.get('/google/callback', async (c) => {
       path: '/',
     })
 
-    return c.redirect(`${FRONTEND_URL}/dashboard`)
+    const origin = new URL(c.req.url).origin
+    return c.redirect(`${origin}/dashboard`)
   } catch (error) {
     console.error('OAuth callback error:', error)
     return c.redirect(`${FRONTEND_URL}/login?error=callback_failed`)

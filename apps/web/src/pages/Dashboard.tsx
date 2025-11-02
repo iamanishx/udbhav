@@ -49,7 +49,7 @@ export default function Dashboard() {
   const fetchPatients = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${apiUrl}/api/health/patients`, {
+      const response = await fetch(`${apiUrl}/health/patients`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -74,7 +74,7 @@ export default function Dashboard() {
   const fetchPatientRecords = async (patientId: string) => {
     try {
       setRecordsLoading(true)
-      const response = await fetch(`${apiUrl}/api/health/patients/${patientId}/records`, {
+      const response = await fetch(`${apiUrl}/health/patients/${patientId}/records`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -145,7 +145,7 @@ export default function Dashboard() {
 
   const handleAddPatient = async (username: string, email: string) => {
     try {
-      const response = await fetch(`${apiUrl}/api/health/create/patient`, {
+      const response = await fetch(`${apiUrl}/health/create/patient`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -182,8 +182,8 @@ export default function Dashboard() {
     try {
       setSearching(true)
       const endpoint = type === 'patient' 
-        ? `${apiUrl}/api/health/search/patient/${selectedPatient?.id}`
-        : `${apiUrl}/api/health/search/global`
+        ? `${apiUrl}/health/search/patient/${selectedPatient?.id}`
+        : `${apiUrl}/health/search/global`
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -222,7 +222,7 @@ export default function Dashboard() {
       formData.append('recordDate', Math.floor(recordDate.getTime() / 1000).toString())
       formData.append('generateSummary', 'true')
 
-      const response = await fetch(`${apiUrl}/api/health/upload-records`, {
+      const response = await fetch(`${apiUrl}/health/upload-records`, {
         method: 'POST',
         credentials: 'include',
         body: formData,

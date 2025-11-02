@@ -1,0 +1,49 @@
+# Caddyfile for Udbhav Monorepo (Dev Mode)
+# Automatic HTTPS with Let's Encrypt
+
+bancodeweb.techsoc-iiitbbsr.com {
+    # Enable automatic HTTPS
+    encode gzip
+
+    # API routes - proxy to backend server
+    handle /api/* {
+        reverse_proxy localhost:3000
+    }
+
+    # Auth routes - proxy to backend server
+    handle /auth/* {
+        reverse_proxy localhost:3000
+    }
+
+    # WebSocket support for HMR (Hot Module Replacement)
+    @websockets {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    reverse_proxy @websockets localhost:5173
+
+    # Frontend - proxy to Vite dev server
+    handle {
+        reverse_proxy localhost:5173
+    }
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/udbhav.log
+        format json
+    }
+}
+
+# Optional: Redirect www to non-www
+www.bancodeweb.techsoc-iiitbbsr.com {
+    redir https://bancodeweb.techsoc-iiitbbsr.com{uri} permanent
+}
