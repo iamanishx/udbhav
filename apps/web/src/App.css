@@ -371,6 +371,54 @@
   letter-spacing: 0.05em;
 }
 
+/* Technical Architecture */
+.technical-architecture {
+  padding: 6rem 0;
+  background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+}
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tech-card {
+  padding: 2.5rem;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0a0a0a 0%, #0f0f0f 40%, #121512 70%, #15211a 100%);
+  transition: all 0.3s ease;
+}
+
+.tech-card:hover {
+  border-color: var(--color-light);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 255, 135, 0.1);
+}
+
+.tech-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.tech-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-family: 'Warownia', 'Syne', sans-serif;
+  color: #ffffff;
+}
+
+.tech-card p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #d0d0d0;
+  opacity: 0.9;
+}
+
 /* Testimonials */
 .testimonials {
   padding: 6rem 0;

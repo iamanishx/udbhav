@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 
@@ -26,15 +26,15 @@ function Landing() {
       <section className="hero">
         <div className="container">
           <h1 className="hero-title">
-            MEET AI-POWERED<br></br>CLINIC SUPPORT.
+            MEET InsightMD<br></br>CLINIC SUPPORT.
           </h1>
           <p className="hero-subtitle">
             Transform unstructured clinical notes into actionable insights with AI-generated summaries 
-            and prioritized differential diagnoses—reducing clinician workload and enhancing patient care.
+            and prioritized differential diagnoses-reducing clinician workload with FreeMemory (our own memory-layer).
           </p>
           <div className="hero-cta">
-            <button className="btn-primary">Start Free Trial</button>
-            <button className="btn-secondary">Watch Demo</button>
+            <Link to="/login" className="btn-primary">Login</Link>
+            <a href="https://p-society.github.io/FreeMemory/" className="btn-secondary">Know More abt FreeMemory</a>
           </div>
           
           {/* Marquee Section */}
@@ -105,122 +105,65 @@ function Landing() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="testimonials">
+      {/* Technical Architecture */}
+      <section className="technical-architecture">
         <div className="container">
           <h2 className="section-title">
-            Trusted by healthcare professionals who prioritize accuracy and efficiency.
+            Built on cutting-edge technology for healthcare excellence.
           </h2>
-          <div className="testimonial-grid">
-            {/* Card 1: Hero/Headline - twice as wide */}
-            <div className="testimonial-card testimonial-hero">
-              <div className="testimonial-header">
-                <span className="testimonial-category">Emergency Medicine</span>
-              </div>
-              <p className="testimonial-text">
-                "ClinicalAI has transformed how we process patient notes. The differential diagnosis 
-                suggestions are remarkably accurate and save us crucial time in emergency situations."
+          <div className="tech-grid">
+            <div className="tech-card">
+              <div className="tech-icon"></div>
+              <h3>Med-PaLM 2 AI Model</h3>
+              <p>
+                Powered by Google's specialized medical AI model, trained on extensive medical literature 
+                and clinical datasets to provide accurate, evidence-based diagnostic suggestions.
               </p>
-              <div className="testimonial-label">LOVES AI-POWERED DIAGNOSIS</div>
-              <div className="testimonial-footer">
-                <div className="testimonial-author">
-                  <img src="/insightMD.svg" alt="Dr. Maria Chen" className="author-avatar-img" />
-                  <div className="author-info">
-                    <div className="author-name">Dr. Maria Chen</div>
-                    <div className="author-title">Emergency Medicine Director</div>
-                  </div>
-                </div>
-                <img src="/insightMD.svg" alt="Hospital Logo" className="company-logo" />
-              </div>
             </div>
 
-            {/* Card 2: Top-Right */}
-            <div className="testimonial-card">
-              <div className="testimonial-header">
-                <span className="testimonial-category">Internal Medicine</span>
-              </div>
-              <p className="testimonial-text">
-                "The ability to trace each diagnosis back to specific clinical evidence gives us 
-                confidence in the AI's recommendations. It's like having a senior consultant available 24/7."
+            <div className="tech-card">
+              <div className="tech-icon"></div>
+              <h3>FreeMemories RAG System</h3>
+              <p>
+                Brain-inspired memory architecture that organizes patient records hierarchically with 
+                decay-based prioritization. Critical information stays accessible while maintaining context.
               </p>
-              <div className="testimonial-label">LOVES EVIDENCE TRACEABILITY</div>
-              <div className="testimonial-footer">
-                <div className="testimonial-author">
-                  <img src="/insightMD.svg" alt="Dr. Robert Patel" className="author-avatar-img" />
-                  <div className="author-info">
-                    <div className="author-name">Dr. Robert Patel</div>
-                    <div className="author-title">Chief Resident, Internal Medicine</div>
-                  </div>
-                </div>
-                <img src="/insightMD.svg" alt="Hospital Logo" className="company-logo" />
-              </div>
             </div>
 
-            {/* Card 3: Bottom-Left */}
-            <div className="testimonial-card">
-              <div className="testimonial-header">
-                <span className="testimonial-category">Primary Care</span>
-              </div>
-              <p className="testimonial-text">
-                "Our diagnostic accuracy improved significantly, and clinician burnout decreased. 
-                The summaries help us focus on patient care rather than paperwork."
+            <div className="tech-card">
+              <div className="tech-icon"></div>
+              <h3>Cloudflare R2 Storage</h3>
+              <p>
+                Secure medical document storage using presigned URLs for direct frontend uploads. 
+                Fast, reliable, and cost-effective infrastructure for medical imaging and records.
               </p>
-              <div className="testimonial-label">LOVES AUTOMATED SUMMARIES</div>
-              <div className="testimonial-footer">
-                <div className="testimonial-author">
-                  <img src="/insightMD.svg" alt="Dr. Sarah Kim" className="author-avatar-img" />
-                  <div className="author-info">
-                    <div className="author-name">Dr. Sarah Kim</div>
-                    <div className="author-title">Medical Director, Primary Care</div>
-                  </div>
-                </div>
-                <img src="/insightMD.svg" alt="Hospital Logo" className="company-logo" />
-              </div>
             </div>
 
-            {/* Cards 4 & 5: Bottom-Right Stack */}
-            <div className="testimonial-stack">
-              <div className="testimonial-card">
-                <div className="testimonial-header">
-                  <span className="testimonial-category">Hospital Medicine</span>
-                </div>
-                <p className="testimonial-text">
-                  "We integrated ClinicalAI into our workflow and had our critical flows covered within days. 
-                  The AI-generated differentials are comprehensive and well-reasoned."
-                </p>
-                <div className="testimonial-label">LOVES RAPID INTEGRATION</div>
-                <div className="testimonial-footer">
-                  <div className="testimonial-author">
-                    <img src="/insightMD.svg" alt="Dr. James Wilson" className="author-avatar-img" />
-                    <div className="author-info">
-                      <div className="author-name">Dr. James Wilson</div>
-                      <div className="author-title">Hospitalist, Teaching Hospital</div>
-                    </div>
-                  </div>
-                  <img src="/insightMD.svg" alt="Hospital Logo" className="company-logo" />
-                </div>
-              </div>
+            <div className="tech-card">
+              <div className="tech-icon"></div>
+              <h3>HIPAA-Compliant Architecture</h3>
+              <p>
+                End-to-end encryption, audit logging, and access controls ensure patient data privacy. 
+                Full compliance with healthcare regulations and security standards.
+              </p>
+            </div>
 
-              <div className="testimonial-card">
-                <div className="testimonial-header">
-                  <span className="testimonial-category">Critical Care</span>
-                </div>
-                <p className="testimonial-text">
-                  "In the ICU, every second counts. ClinicalAI helps us quickly identify potential complications 
-                  and adjust treatment plans based on evolving clinical data."
-                </p>
-                <div className="testimonial-label">LOVES REAL-TIME INSIGHTS</div>
-                <div className="testimonial-footer">
-                  <div className="testimonial-author">
-                    <img src="/insightMD.svg" alt="Dr. Emily Rodriguez" className="author-avatar-img" />
-                    <div className="author-info">
-                      <div className="author-name">Dr. Emily Rodriguez</div>
-                      <div className="author-title">Critical Care Intensivist</div>
-                    </div>
-                  </div>
-                  <img src="/insightMD.svg" alt="Hospital Logo" className="company-logo" />
-                </div>
-              </div>
+            <div className="tech-card">
+              <div className="tech-icon"></div>
+              <h3>Real-Time Processing</h3>
+              <p>
+                Vector embeddings and graph-based memory retrieval enable sub-second query responses. 
+                Multi-hop knowledge traversal for comprehensive clinical insights.
+              </p>
+            </div>
+
+            <div className="tech-card">
+              <div className="tech-icon"></div>
+              <h3>Hierarchical Memory Sectors</h3>
+              <p>
+                Patient records automatically classified into contextual categories with intelligent 
+                decay algorithms. Recent and relevant information prioritized for optimal retrieval.
+              </p>
             </div>
           </div>
         </div>
